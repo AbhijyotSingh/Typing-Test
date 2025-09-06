@@ -112,7 +112,7 @@ def update():
     names=[i[0] for i in cur.fetchall()]  
     cur.execute("SELECT passwords from login_details where names=%s",(name,))
     passwords=cur.fetchone()
-    if name in names and password in passwords[0]:
+    if name in names and password==passwords[0]:
         ques=input("Which part do you want to update (username/password):")
         if ques.lower()=="username":
             new_user=input("Enter new username:")
@@ -172,3 +172,4 @@ if __name__=="__main__":
     cur.execute("CREATE TABLE IF NOT EXISTS login_details (id INT AUTO_INCREMENT PRIMARY KEY, names VARCHAR(255) NOT NULL, passwords varchar(255) NOT NULL)")
     print("Login table created.")
     main()
+
