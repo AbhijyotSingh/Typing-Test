@@ -10,12 +10,11 @@ def register():
         cur.execute("INSERT INTO login_details(names,passwords) VALUES(%s,%s)",(name1,password1))
         db.commit()
         print("Registered successfully! Enjoy.")
-        typing_test()
     else:
         print("Username already exists. Try logging in.")
     
 def login():
-    print("Welcome back!\n")
+    print("Welcome back!")
     name1=input("Please enter your username to confirm:")
     password1=input("Please enter your password to confirm:")
     cur.execute("SELECT names from login_details")
@@ -24,7 +23,6 @@ def login():
     passwords=cur.fetchone()
     if name1 in names and password1==passwords[0]:
         print(f"Welcome back {name1}!")
-        typing_test()
     else:
         print("You are not a registered user. Try again.")    
         return        
@@ -78,10 +76,60 @@ def typing_test():
     cur.execute(f"INSERT INTO {name}(wpm,acc) values(%s,%s)",(wpm,per))
     db.commit()
   
+def show_details():
+    ques=input("Do you want to see login details or typing details (login/typing):")
+    if ques.lower()=="typing":
+        cur.execute("SELECT names from login_details")
+        name=input("Enter your username:")
+        names=[i[0] for i in cur.fetchall()]  
+        if name in names:
+            print("(Number of races, Words/Min, Accuracy)")
+            cur.execute(f"SELECT * from {name}")
+            for i in cur:
+                print(i)
+        else:
+            print("User not found. Try registering.")
+    elif ques.lower()=="login":
+        name=input("Enter your username:")
+        cur.execute("SELECT names from login_details")
+        names=[i[0] for i in cur.fetchall()] 
+        print("(ID, Username, Password)") 
+        if name in names:
+            cur.execute("SELECT * from login_details where names=%s",(name,))
+            for i in cur:
+                print(i)
+        else:
+            print("User not found.")
+            return
+    else:
+        print("Only these options are available.")
+        return
+  
+def update():
+    name=input("Enter your old username:")
+    password=input("Enter your old password:")
+    cur.execute("SELECT names from login_details")
+    names=[i[0] for i in cur.fetchall()]  
+    cur.execute("SELECT passwords from login_details where names=%s",(name,))
+    passwords=cur.fetchone()
+    if name in names and password in passwords[0]:
+        ques=input("Which part do you want to update (username/password):")
+        if ques.lower()=="username":
+            new_user=input("Enter new username:")
+            cur.execute("UPDATE login_details set names=%s where passwords=%s",(new_user,password))
+            db.commit()
+        elif ques.lower()=="password":
+            new_pass=input("Enter new password:")
+            cur.execute("UPDATE login_details set passwords=%s where names=%s",(new_pass,name))
+            db.commit()
+        else:
+            print("Only these options are available.")
+            return
+  
 def main():
     print("\n-----Welcome to Typing Test-----")
     print("Challenge yourself to type small, randomly generated paragraphs as fast as you can!")
-    ques=input("Do you want to login or register(login/register):")
+    ques=input("Do you want to login or register (login/register):")
     if ques.lower()=="register":
         register()
     elif ques.lower()=="login":
@@ -89,7 +137,27 @@ def main():
     else:
         print("No more options available.")
         return
-    
+    print("Press 0 to exit.")
+    print("Press 1 to start to the Typing Test.")
+    print("Press 2 to show your details.")
+    print("Press 3 to update your username or password.")
+    try:
+        choice=int(input("Enter choice:"))
+    except ValueError:
+        print("Only integral values allowed.")
+    else:
+        if choice==0:
+            return 
+        elif choice==1:
+            typing_test()
+        elif choice==2:
+            show_details()
+        elif choice==3:
+            update()
+        else:
+            print("Only these options are available.")
+            return 
+        
 if __name__=="__main__":
     pass1=input("Enter the password for your SQL Database:")
     db=sql.connect(
